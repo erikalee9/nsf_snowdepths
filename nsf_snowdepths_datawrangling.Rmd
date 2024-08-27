@@ -1,0 +1,172 @@
+---
+title: "nsf_snowdepths_datawrangling"
+output: html_document
+date: "2024-08-27"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Set Up
+
+```{r}
+library(tidyverse)
+library(lterdatasampler)
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(readxl)
+library(lubridate)
+library(plotly)
+library(openxlsx)
+library(plotly)
+library(rstatix)
+library(htmlwidgets)
+library(RColorBrewer)
+library(patchwork)
+library(ggpubr)
+
+setwd("/Volumes/wcnr-network/Research/Kampf/Private/field_data")
+```
+
+## Calling in Data
+
+### Weather Station Data
+
+```{r}
+transb_wx_15min_r <- read_csv('nsf/trans_burned/trans_burned_wx_15min_r.csv') %>%
+  #have to convert the datetime to MST, not UTC, if uploading a csv
+  mutate(datetime = as.POSIXct(datetime, tz = 'MST'))
+
+transub_wx_15min_r <- read_csv('nsf/trans_unburned/trans_unburned_wx_15min_r.csv') %>%
+  #have to convert the datetime to MST, not UTC, if uploading a csv
+  mutate(datetime = as.POSIXct(datetime, tz = 'MST'))
+
+persb_wx_hourly_r <- read_csv('nsf/pers_burned/pers_burned_wx_hourly_r.csv') %>%
+  #have to convert the datetime to MST, not UTC, if uploading a csv
+  mutate(datetime = as.POSIXct(datetime, tz = 'MST'))
+
+persb_wx_hourly_r <- read_csv('nsf/pers_burned/pers_burned_wx_hourly_r.csv') %>%
+  #have to convert the datetime to MST, not UTC, if uploading a csv
+  mutate(datetime = as.POSIXct(datetime, tz = 'MST'))
+
+persub_wx_hourly_r <- read_csv('nsf/pers_unburned/pers_unburned_wx_hourly_r.csv') %>%
+  #have to convert the datetime to MST, not UTC, if uploading a csv
+  mutate(datetime = as.POSIXct(datetime, tz = 'MST'))
+```
+
+### Snow Camera Data
+
+```{r}
+
+```
+
+## Creating Snow depth-specific Dataframes
+
+```{r}
+#setting start and end dates for the winter 2023-24 season
+## based on the snowdepth cameras 
+start_datetime <- ymd_hms("2023-11-16 00:00:00", tz = "MST")
+
+end_datetime <- ymd_hms("2024-06-05 00:00:00")
+```
+
+Weather Station Snowdepth Data
+
+```{r}
+# creating a dataframe that is all of the weather station data including snow depths for the winter seasons 
+
+#transitional 
+full24_transb_snow_wxstation_data <- transb_wx_15min_r %>%
+    #adding date and time columns
+  mutate(
+    date = as_date(datetime),
+    time = format(datetime, "%H:%M:%S")) %>%
+  #assigning a timezone then filtering to specific datetimestep for winter 2023-24
+   mutate(datetime_mst = with_tz(datetime, tzone = "MST")) %>%
+  filter(datetime_mst >= as.POSIXct("2023-11-16 00:00:00", tz = "MST") & 
+         datetime_mst <= as.POSIXct("2024-06-05 00:00:00", tz = "MST")) %>%
+    select(-datetime) %>%
+    rename(datetime = datetime_mst) %>%
+    select(datetime, date, time, SnowDepth_m)
+
+full24_transub_snow_wxstation_data <- transub_wx_15min_r %>%
+  #adding date and time columns
+  mutate(
+    date = as_date(datetime),
+    time = format(datetime, "%H:%M:%S")) %>%
+  #assigning a timezone then filtering to specific datetimestep for winter 2023-24
+   mutate(datetime_mst = with_tz(datetime, tzone = "MST")) %>%
+  filter(datetime_mst >= as.POSIXct("2023-11-16 00:00:00", tz = "MST") & 
+         datetime_mst <= as.POSIXct("2024-06-05 00:00:00", tz = "MST")) %>%
+    select(-datetime) %>%
+    rename(datetime = datetime_mst) %>%
+    select(datetime, date, time, SnowDepth_m)
+
+#persistent
+full24_persb_snow_wxstation_data <- persb_wx_hourly_r %>%
+  #adding date and time columns
+  mutate(
+    date = as_date(datetime),
+    time = format(datetime, "%H:%M:%S")) %>%
+  #assigning a timezone then filtering to specific datetimestep for winter 2023-24
+   mutate(datetime_mst = with_tz(datetime, tzone = "MST")) %>%
+  filter(datetime_mst >= as.POSIXct("2023-11-16 00:00:00", tz = "MST") & 
+         datetime_mst <= as.POSIXct("2024-06-05 00:00:00", tz = "MST")) %>%
+    select(-datetime) %>%
+    rename(datetime = datetime_mst) %>%
+    select(datetime, date, time, SnowDepth_m)
+
+full24_persub_snow_wxstation_data <- persub_wx_hourly_r %>%
+  #adding date and time columns
+  mutate(
+    date = as_date(datetime),
+    time = format(datetime, "%H:%M:%S")) %>%
+  #assigning a timezone then filtering to specific datetimestep for winter 2023-24
+   mutate(datetime_mst = with_tz(datetime, tzone = "MST")) %>%
+  filter(datetime_mst >= as.POSIXct("2023-11-16 00:00:00", tz = "MST") & 
+         datetime_mst <= as.POSIXct("2024-06-05 00:00:00", tz = "MST")) %>%
+    select(-datetime) %>%
+    rename(datetime = datetime_mst) %>%
+    select(datetime, date, time, SnowDepth_m)
+```
+
+```{r}
+#daily maximum snow depth to compare to snow camera data
+
+dailymax_transb_snow_wxstation <- full24_transb_snow_wxstation_data %>%
+  group_by(date) %>%
+  summarize(maxsnowdepth_m = max(SnowDepth_m)) %>%
+  mutate(maxsnowdepth_cm = maxsnowdepth_m*100) %>%
+  #adding in burn_status and zone columns
+  mutate(burn_status = "burned", zone = "transitional")
+
+dailymax_transub_snow_wxstation <- full24_transub_snow_wxstation_data %>%
+  group_by(date) %>%
+  summarize(maxsnowdepth_m = max(SnowDepth_m)) %>%
+  mutate(maxsnowdepth_cm = maxsnowdepth_m*100) %>%
+  mutate(burn_status = "unburned", zone = "transitional")
+
+dailymax_persb_snow_wxstation <- full24_persb_snow_wxstation_data %>%
+  group_by(date) %>%
+  summarize(maxsnowdepth_m = max(SnowDepth_m)) %>%
+  mutate(maxsnowdepth_cm = maxsnowdepth_m*100) %>%
+  mutate(burn_status = "burned", zone = "persistent")
+
+dailymax_persub_snow_wxstation <- full24_persub_snow_wxstation_data %>%
+  group_by(date) %>%
+  summarize(maxsnowdepth_m = max(SnowDepth_m)) %>%
+  mutate(maxsnowdepth_cm = maxsnowdepth_m*100) %>%
+  mutate(burn_status = "unburned", zone = "persistent")
+```
+
+```{r}
+#creating a combined dataset for all the weather station snowdepths for 2023-24 winter
+```
+
+\*\* before can I do a combined, I need to get a longer timestep for the transitional unburned weather station data and process it through the Wx_datawrangling rmarkdown. Then pull this in to this file and redo.
+
+```{r}
+
+```
