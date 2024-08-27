@@ -39,7 +39,7 @@ transb_wx_15min_r <- read_csv('nsf/trans_burned/trans_burned_wx_15min_r.csv') %>
   #have to convert the datetime to MST, not UTC, if uploading a csv
   mutate(datetime = as.POSIXct(datetime, tz = 'MST'))
 
-transub_wx_15min_r <- read_csv('nsf/trans_unburned/trans_unburned_wx_15min_r.csv') %>%
+transub_wx_hourly_r <- read_csv('nsf/trans_unburned/trans_unburned_wx_hourly_r.csv') %>%
   #have to convert the datetime to MST, not UTC, if uploading a csv
   mutate(datetime = as.POSIXct(datetime, tz = 'MST'))
 
@@ -91,7 +91,7 @@ full24_transb_snow_wxstation_data <- transb_wx_15min_r %>%
     rename(datetime = datetime_mst) %>%
     select(datetime, date, time, SnowDepth_m)
 
-full24_transub_snow_wxstation_data <- transub_wx_15min_r %>%
+full24_transub_snow_wxstation_data <- transub_wx_hourly_r %>%
   #adding date and time columns
   mutate(
     date = as_date(datetime),
