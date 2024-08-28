@@ -69,14 +69,6 @@ dailymax105E_transub_snow <- read_csv('nsf/camera_snowdepths/2024_105E_transub_s
 
 ## Creating Snow depth-specific Dataframes
 
-```{r}
-#setting start and end dates for the winter 2023-24 season
-## based on the snowdepth cameras 
-start_datetime <- ymd_hms("2023-11-16 00:00:00", tz = "MST")
-
-end_datetime <- ymd_hms("2024-06-05 00:00:00")
-```
-
 ### Weather Station Snowdepth Data
 
 ```{r}
@@ -201,12 +193,6 @@ dailymax105E_transub_snow <- dailymax105E_transub_snow %>%
   select(date, zone, burn_status, mortality, conditions, maxsnowdepth_m, maxsnowdepth_cm)
 ```
 
-### Combined Dataframes
-
-```{r}
-daily24_combined_snowdepths <- 
-```
-
 ## Plotting Snowdepths 
 
 ```{r}
@@ -256,47 +242,312 @@ dailytrans_sd_plot <- ggplot() +
 dailytrans_sd_plot
 ```
 
+## Box Plots
+
+Creating dataframes for boxplots
+
 ```{r}
+#using the same dataframes as above, just adding a month column and filtering for feb-june
+f_dailymax_persb_snow_wxstation <- dailymax_persb_snow_wxstation %>%
+  #adding a month column
+  mutate(month = month(date)) %>%
+  select(date, month, zone, burn_status, everything()) %>%
+  group_by(month) %>%
+  mutate(mean_sd_bymonth_cm = mean(maxsnowdepth_cm)) %>%
+  ungroup() %>%
+  filter(month >= 2 & month <= 6)
 
-## example plot to use code of!
-burned_day_s_avg_plot <- ggplot(data = burned_day_s_avg_values) + 
-  geom_line(aes(x = date, y = SWin_Avg, color = "SWin_Avg", linetype = "Weather Station")) +
-  geom_line(aes(x = date, y = SWout_Avg, color = "SWout_Avg", linetype = "Weather Station")) +
-  geom_line(aes(x = date, y = LWin_Avg, color = "LWin_Avg", linetype = "Weather Station")) +
-  geom_line(aes(x = date, y = LWout_Avg, color = "LWout_Avg", linetype = "Weather Station")) +
-  geom_line(aes(x = date, y = tree_LWout_wperm2, color = "tree_LWout_avg_wperm2", linetype = "Tree Temperature Sensors")) +
-  facet_wrap(~ zone + burn_status, scales = "free_y", dir = "h") +  # Facet by zone and phase
-  labs(
-    #title = "Transitional Unburned",
-    x = "Date",
-    y = "Radiation components (W/m2)",
-    color = "Variable", 
-    linetype = "Data Source"
-    ) +
-  theme_bw() +  # Use a minimal theme for a clean look
-  scale_color_manual(values = color_values, labels = color_labels) + 
-  scale_linetype_manual(values = line_types)
+f_dailymax_persub_snow_wxstation <- dailymax_persub_snow_wxstation %>%
+  #adding a month column
+  mutate(month = month(date)) %>%
+  select(date, month, zone, burn_status, everything()) %>%
+  group_by(month) %>%
+  mutate(mean_sd_bymonth_cm = mean(maxsnowdepth_cm)) %>%
+  ungroup() %>%
+  filter(month >= 2 & month <= 6)
 
-burned_day_s_avg_plot
+f_dailymax_transb_snow_wxstation <- dailymax_transb_snow_wxstation %>%
+  #adding a month column
+  mutate(month = month(date)) %>%
+  select(date, month, zone, burn_status, everything()) %>%
+  group_by(month) %>%
+  mutate(mean_sd_bymonth_cm = mean(maxsnowdepth_cm)) %>%
+  ungroup() %>%
+  filter(month >= 2 & month <= 6)
 
-## unburned
-unburned_day_s_avg_plot <- ggplot(data = unburned_day_s_avg_values) + 
-  geom_line(aes(x = date, y = SWin_Avg, color = "SWin_Avg", linetype = "Weather Station")) +
-  geom_line(aes(x = date, y = SWout_Avg, color = "SWout_Avg", linetype = "Weather Station")) +
-  geom_line(aes(x = date, y = LWin_Avg, color = "LWin_Avg", linetype = "Weather Station")) +
-  geom_line(aes(x = date, y = LWout_Avg, color = "LWout_Avg", linetype = "Weather Station")) +
-  geom_line(aes(x = date, y = tree_LWout_wperm2, color = "tree_LWout_avg_wperm2", linetype = "Tree Temperature Sensors")) +
-  facet_wrap(~ zone + burn_status, scales = "free_y", dir = "h") +  # Facet by zone and phase
-  labs(
-    #title = "Transitional Unburned",
-    x = "Date",
-    y = "Radiation components (W/m2)",
-    color = "Variable", 
-    linetype = "Data Source"
-    ) +
-  theme_bw() +  # Use a minimal theme for a clean look
-  scale_color_manual(values = color_values, labels = color_labels) + 
-  scale_linetype_manual(values = line_types)
+f_dailymax_transub_snow_wxstation <- dailymax_transub_snow_wxstation %>%
+  #adding a month column
+  mutate(month = month(date)) %>%
+  select(date, month, zone, burn_status, everything()) %>%
+  group_by(month) %>%
+  mutate(mean_sd_bymonth_cm = mean(maxsnowdepth_cm)) %>%
+  ungroup() %>%
+  filter(month >= 2 & month <= 6)
 
-unburned_day_s_avg_plot
+f_dailymax105E_persb_snow <- dailymax105E_persb_snow %>%
+  #adding a month column
+  mutate(month = month(date)) %>%
+  select(date, month, zone, burn_status, everything()) %>%
+  group_by(month) %>%
+  mutate(mean_sd_bymonth_cm = mean(maxsnowdepth_cm)) %>%
+  ungroup() %>%
+  filter(month >= 2 & month <= 6)
+
+f_dailymax105E_transb_snow <- dailymax105E_transb_snow %>%
+  #adding a month column
+  mutate(month = month(date)) %>%
+  select(date, month, zone, burn_status, everything()) %>%
+  group_by(month) %>%
+  mutate(mean_sd_bymonth_cm = mean(maxsnowdepth_cm)) %>%
+  ungroup() %>%
+  filter(month >= 2 & month <= 6)
+
+f_dailymax105E_transub_snow <- dailymax105E_transub_snow %>%
+  #adding a month column
+  mutate(month = month(date)) %>%
+  select(date, month, zone, burn_status, everything()) %>%
+  group_by(month) %>%
+  mutate(mean_sd_bymonth_cm = mean(maxsnowdepth_cm)) %>%
+  ungroup() %>%
+  filter(month >= 2 & month <= 6)
 ```
+
+Plotting
+
+Weather Station Data
+
+```{r}
+#burned weather station snowdepths 
+burned_wxsd_boxplot <- ggplot()+
+  geom_boxplot(data = f_dailymax_persb_snow_wxstation, aes(x = factor(month), y = maxsnowdepth_cm, fill = "Persistent Zone"), alpha = 1) +
+  geom_boxplot(data = f_dailymax_transb_snow_wxstation, aes(x = factor(month), y = maxsnowdepth_cm, fill = "Transitional Zone"), alpha = 0.7) +
+  labs(
+    title = "A. Burned Wx Station",
+    x = "Month",
+    y = "Snow Depth (cm)"
+  ) +
+  scale_fill_manual(name = "Snow Zone", values = c("Persistent Zone" = "#D95F02", "Transitional Zone" = "#66A61E")) +
+  theme_bw()
+
+burned_wxsd_boxplot
+
+#unburned wx station boxplots
+unburned_wxsd_boxplot <- ggplot()+
+  geom_boxplot(data = f_dailymax_persub_snow_wxstation, aes(x = factor(month), y = maxsnowdepth_cm, fill = "Persistent Zone"), alpha = 1) +
+  geom_boxplot(data = f_dailymax_transub_snow_wxstation, aes(x = factor(month), y = maxsnowdepth_cm, fill = "Transitional Zone"), alpha = 0.7) +
+  labs(
+    title = "C. Unburned Wx Station",
+    x = "Month",
+    y = "Snow Depth (cm)"
+  ) +
+  scale_fill_manual(name = "Snow Zone", values = c("Persistent Zone" = "#D95F02", "Transitional Zone" = "#66A61E")) +
+  theme_bw()
+
+unburned_wxsd_boxplot
+```
+
+Snow Camera Data
+
+```{r}
+#burned snow camera snowdepths 
+burned_camerasd_boxplot <- ggplot()+
+  geom_boxplot(data = f_dailymax105E_persb_snow, aes(x = factor(month), y = maxsnowdepth_cm, fill = "Persistent Zone"), alpha = 1) +
+  geom_boxplot(data = f_dailymax105E_transb_snow, aes(x = factor(month), y = maxsnowdepth_cm, fill = "Transitional Zone"), alpha = 0.7) +
+  labs(
+    title = "B. Burned Camera",
+    x = "Month",
+    y = "Snow Depth (cm)"
+  ) +
+  scale_fill_manual(name = "Snow Zone", values = c("Persistent Zone" = "#D95F02", "Transitional Zone" = "#66A61E")) +
+  theme_bw()
+
+burned_camerasd_boxplot
+
+#burned snow camera snowdepths 
+unburned_camerasd_boxplot <- ggplot()+
+  geom_boxplot(data = f_dailymax_persub_snow_wxstation, aes(x = factor(month), y = maxsnowdepth_cm, fill = "Persistent Zone"), alpha = 1) +
+  geom_boxplot(data = f_dailymax105E_transub_snow, aes(x = factor(month), y = maxsnowdepth_cm, fill = "Transitional Zone"), alpha = 0.7) +
+  labs(
+    title = "D. Unburned Camera",
+    x = "Month",
+    y = "Snow Depth (cm)"
+  ) +
+  scale_fill_manual(name = "Snow Zone", values = c("Persistent Zone" = "#D95F02", "Transitional Zone" = "#66A61E")) +
+  theme_bw()
+
+unburned_camerasd_boxplot
+```
+
+Arranging Plots
+
+```{r}
+arranged_sd_boxplots <- ggarrange(
+  burned_wxsd_boxplot,  burned_camerasd_boxplot, unburned_wxsd_boxplot, unburned_camerasd_boxplot, 
+  ncol = 2, nrow = 2,  # Arrange in 2 columns and 2 rows
+  common.legend = TRUE,  # Optionally share a common legend
+  legend = "right"  # Position the legend at the bottom
+)
+
+arranged_sd_boxplots
+```
+
+```{r}
+#saving the arranged boxplot
+# Save the final plot
+ggsave(
+  filename = "arranged_sd_boxplots.png", 
+  plot = arranged_sd_boxplots,  # Plot to save
+  width = 10,  # Width of the plot in inches
+  height = 8,  # Height of the plot in inches
+  dpi = 300,  # Resolution in dots per inch
+  units = "in"  # Units for width and height
+)
+```
+
+## Weather Station-only Line Plots
+
+For the months of February-June
+
+```{r}
+#creating filtered dataframes with daily means only of snowdepths
+
+f_dailymean_transb_snow_wxstation <- full24_transb_snow_wxstation_data %>%
+  mutate(month = month(date)) %>%
+  #adding in burn_status and zone columns
+  mutate(burn_status = "burned", zone = "transitional") %>%
+  filter(month >= 2 & month <= 6) %>%
+  group_by(date) %>%
+  mutate(meansnowdepth_m = mean(SnowDepth_m, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(meansnowdepth_cm = meansnowdepth_m*100, na.rm = TRUE) %>%
+  group_by(month)%>%
+  mutate(mean_depth_bymonth_cm = mean(meansnowdepth_cm)) %>%
+  ungroup() %>%
+  group_by(date, month, zone, burn_status, meansnowdepth_m, meansnowdepth_cm, mean_depth_bymonth_cm)%>%
+  summarize()
+
+f_dailymean_transub_snow_wxstation <- full24_transub_snow_wxstation_data %>%
+  mutate(month = month(date)) %>%
+  #adding in burn_status and zone columns
+  mutate(burn_status = "burned", zone = "transitional") %>%
+  filter(month >= 2 & month <= 6) %>%
+  group_by(date) %>%
+  mutate(meansnowdepth_m = mean(SnowDepth_m, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(meansnowdepth_cm = meansnowdepth_m*100, na.rm = TRUE) %>%
+  group_by(month)%>%
+  mutate(mean_depth_bymonth_cm = mean(meansnowdepth_cm)) %>%
+  ungroup() %>%
+  group_by(date, month, zone, burn_status, meansnowdepth_m, meansnowdepth_cm, mean_depth_bymonth_cm)%>%
+  summarize()
+
+f_dailymean_persb_snow_wxstation <- full24_persb_snow_wxstation_data %>%
+  mutate(month = month(date)) %>%
+  #adding in burn_status and zone columns
+  mutate(burn_status = "burned", zone = "transitional") %>%
+  filter(month >= 2 & month <= 6) %>%
+  group_by(date) %>%
+  mutate(meansnowdepth_m = mean(SnowDepth_m, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(meansnowdepth_cm = meansnowdepth_m*100, na.rm = TRUE) %>%
+  group_by(month)%>%
+  mutate(mean_depth_bymonth_cm = mean(meansnowdepth_cm)) %>%
+  ungroup() %>%
+  group_by(date, month, zone, burn_status, meansnowdepth_m, meansnowdepth_cm, mean_depth_bymonth_cm)%>%
+  summarize()
+
+f_dailymean_persub_snow_wxstation <- full24_persub_snow_wxstation_data %>%
+  mutate(month = month(date)) %>%
+  #adding in burn_status and zone columns
+  mutate(burn_status = "burned", zone = "transitional") %>%
+  filter(month >= 2 & month <= 6) %>%
+  group_by(date) %>%
+  mutate(meansnowdepth_m = mean(SnowDepth_m, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(meansnowdepth_cm = meansnowdepth_m*100, na.rm = TRUE) %>%
+  group_by(month)%>%
+  mutate(mean_depth_bymonth_cm = mean(meansnowdepth_cm)) %>%
+  ungroup() %>%
+  group_by(date, month, zone, burn_status, meansnowdepth_m, meansnowdepth_cm, mean_depth_bymonth_cm)%>%
+  summarize()
+```
+
+```{r}
+#creating monthly dataframes with mean_monthly_snowdepth for points on plot
+monthly_mean_persb_snow_wxstation <- f_dailymean_persb_snow_wxstation %>%
+  group_by(month, zone, burn_status, mean_depth_bymonth_cm) %>%
+  summarize() %>%
+  #adding in a mid-month date column so that the it can be plotted on the same x-axis as line plots
+  mutate(date = ymd(paste0("2024-", month, "-15")))
+
+monthly_mean_persub_snow_wxstation <- f_dailymean_persub_snow_wxstation %>%
+  group_by(month, zone, burn_status, mean_depth_bymonth_cm) %>%
+  summarize() %>%
+  #adding in a mid-month date column so that the it can be plotted on the same x-axis as line plots
+  mutate(date = ymd(paste0("2024-", month, "-15")))
+
+monthly_mean_transb_snow_wxstation <- f_dailymean_transb_snow_wxstation %>%
+  group_by(month, zone, burn_status, mean_depth_bymonth_cm) %>%
+  summarize() %>%
+  #adding in a mid-month date column so that the it can be plotted on the same x-axis as line plots
+  mutate(date = ymd(paste0("2024-", month, "-15")))
+
+monthly_mean_transub_snow_wxstation <- f_dailymean_transub_snow_wxstation %>%
+  group_by(month, zone, burn_status, mean_depth_bymonth_cm) %>%
+  summarize() %>%
+  #adding in a mid-month date column so that the it can be plotted on the same x-axis as line plots
+  mutate(date = ymd(paste0("2024-", month, "-15")))
+```
+
+Plotting
+
+-   This plot looks good! It is only using the weather station data though, something to consider!
+
+```{r}
+wx_dailyavg_sd_plot <- ggplot() +
+  geom_line(data = f_dailymean_transb_snow_wxstation, 
+            aes(x = date, y = meansnowdepth_cm, color = "Transitional", linetype = "Burned")) + 
+  geom_line(data = f_dailymean_transub_snow_wxstation, 
+            aes(x = date, y = meansnowdepth_cm, color = "Transitional", linetype = "Unburned")) + 
+  geom_line(data = f_dailymean_persb_snow_wxstation, 
+            aes(x = date, y = meansnowdepth_cm, color = "Persistent", linetype = "Burned")) + 
+  geom_line(data = f_dailymean_persub_snow_wxstation, 
+            aes(x = date, y = meansnowdepth_cm, color = "Persistent", linetype = "Unburned")) +
+  #adding in points for the monthly mean snowdepths
+  geom_point(data = monthly_mean_persb_snow_wxstation, 
+             aes(x = date, y = mean_depth_bymonth_cm, color = "Transitional Weather Station", shape = "Burned"), size = 2) +
+  geom_point(data = monthly_mean_persub_snow_wxstation, 
+             aes(x = date, y = mean_depth_bymonth_cm, color = "Transitional Weather Station", shape = "Unburned"), size = 2) +
+  geom_point(data = monthly_mean_transb_snow_wxstation, 
+             aes(x = date, y = mean_depth_bymonth_cm, color = "Persistent Weather Station", shape = "Burned"), size = 2) +
+  geom_point(data = monthly_mean_transub_snow_wxstation,
+             aes(x = date, y = mean_depth_bymonth_cm, color = "Persistent Weather Station", shape = "Unburned"), size = 2) +
+  labs(
+    x = "Date",
+    y = "Mean Daily Snowdepth (cm)",
+    title = "Mean Daily Averaged Snow Depths by Zone and Burn Status", 
+    color = "Snow Zone",  # Rename color legend
+    linetype = "Burn Status", # Rename linetype legend
+    shape = "Monthly Mean Depth (cm)"# Rename linetype legend"
+  ) +
+  theme_bw() +
+  scale_color_manual(values = c("Persistent" = "#D95F02", "Transitional" = "#66A61E")) +
+  scale_linetype_manual(values = c("Burned" = "solid", "Unburned" = "dashed")) +
+  theme(legend.position = "right")
+
+wx_dailyavg_sd_plot
+```
+
+```{r}
+#saving plot
+ggsave(
+  filename = "wxstation_dailyavg_sd_plot.png", 
+  plot = wx_dailyavg_sd_plot,  # Plot to save
+  width = 10,  # Width of the plot in inches
+  height = 8,  # Height of the plot in inches
+  dpi = 300,  # Resolution in dots per inch
+  units = "in"  # Units for width and height
+)
+```
+
+\*\* need to find this saved plot and add it to the plot folde rin my r_folder. Then save and export changes to github.
