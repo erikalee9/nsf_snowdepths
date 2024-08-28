@@ -59,7 +59,12 @@ persub_wx_hourly_r <- read_csv('nsf/pers_unburned/pers_unburned_wx_hourly_r.csv'
 ### Snow Camera Data
 
 ```{r}
+#105E camera snow depths
+dailymax105E_persb_snow <- read_csv('nsf/camera_snowdepths/2024_persb_lp_highmort_east_snowdepths.csv')
 
+dailymax105E_transb_snow <- read_csv('nsf/camera_snowdepths/2024_105E_transb_snowdepths.csv')
+
+dailymax105E_transub_snow <- read_csv('nsf/camera_snowdepths/2024_105E_transub_snowdepths.csv')
 ```
 
 ## Creating Snow depth-specific Dataframes
@@ -72,7 +77,7 @@ start_datetime <- ymd_hms("2023-11-16 00:00:00", tz = "MST")
 end_datetime <- ymd_hms("2024-06-05 00:00:00")
 ```
 
-Weather Station Snowdepth Data
+### Weather Station Snowdepth Data
 
 ```{r}
 # creating a dataframe that is all of the weather station data including snow depths for the winter seasons 
@@ -161,12 +166,137 @@ dailymax_persub_snow_wxstation <- full24_persub_snow_wxstation_data %>%
   mutate(burn_status = "unburned", zone = "persistent")
 ```
 
+### Snow Camera Snowdepth Data
+
+\*\* don't have the following dataframe for persistent unburned because that camera did not work.
+
 ```{r}
-#creating a combined dataset for all the weather station snowdepths for 2023-24 winter
+#manipulating dataframes to match weather station dataframes, etc.
+
+dailymax105E_persb_snow <- dailymax105E_persb_snow %>%
+  #make date recognized as a date
+  mutate(date = as.Date(date)) %>%
+  mutate(maxsnowdepth_m = max_depth_cm/100) %>%
+  #renameing mac depth column 
+  rename(maxsnowdepth_cm = max_depth_cm) %>%
+  #selecting only the rows I need
+  select(date, zone, burn_status, mortality, conditions, maxsnowdepth_m, maxsnowdepth_cm)
+
+dailymax105E_transb_snow <- dailymax105E_transb_snow %>%
+  #make date recognized as a date
+  mutate(date = as.Date(date)) %>%
+  mutate(maxsnowdepth_m = max_depth_cm/100) %>%
+  #renameing mac depth column 
+  rename(maxsnowdepth_cm = max_depth_cm) %>%
+  #selecting only the rows I need
+  select(date, zone, burn_status, mortality, conditions, maxsnowdepth_m, maxsnowdepth_cm)
+
+dailymax105E_transub_snow <- dailymax105E_transub_snow %>%
+  #make date recognized as a date
+  mutate(date = as.Date(date)) %>%
+  mutate(maxsnowdepth_m = max_depth_cm/100) %>%
+  #renameing mac depth column 
+  rename(maxsnowdepth_cm = max_depth_cm) %>%
+  #selecting only the rows I need
+  select(date, zone, burn_status, mortality, conditions, maxsnowdepth_m, maxsnowdepth_cm)
 ```
 
-\*\* before can I do a combined, I need to get a longer timestep for the transitional unburned weather station data and process it through the Wx_datawrangling rmarkdown. Then pull this in to this file and redo.
+### Combined Dataframes
+
+```{r}
+daily24_combined_snowdepths <- 
+```
+
+## Plotting Snowdepths 
+
+```{r}
+#colors for plots
+#to display the colors
+display.brewer.pal(n = 8, name = "Dark2")
+
+#to get the hex number of the colors
+brewer.pal(n = 8, name = "Dark2")
+```
+
+Plotting Persistent Weather Station & Snowstakes
+
+```{r}
+#persistent burned/unburned data weather station and snow camera data
+dailypers_sd_plot <- ggplot() +
+  geom_line(data = dailymax_persb_snow_wxstation, aes(x = date, y = maxsnowdepth_cm, color = "Pers Burned Wx Station")) + 
+  geom_line(data = dailymax105E_persb_snow, aes(x = date, y = maxsnowdepth_cm, color = "Pers Burned Snowstake Camera")) +
+  geom_line(data = dailymax_persub_snow_wxstation, aes(x= date, y = maxsnowdepth_cm, color =  "Pers Unburned Wx Station"), alpha = 0.7) +
+  labs(
+    #title = "Transitional Unburned",
+    x = "Date",
+    y = "Max Daily Snowdepth (cm)"
+    ) +
+  theme_bw() +
+  scale_color_manual(values = c("Pers Burned Wx Station" = "#D95F02", "Pers Burned Snowstake Camera" = "#E6AB02", "Pers Unburned Wx Station" = "#66A61E"))
+
+dailypers_sd_plot
+```
+
+Plotting Transitional Weather Station & Snowstakes
+
+```{r}
+dailytrans_sd_plot <- ggplot() +
+  geom_line(data = dailymax_transb_snow_wxstation, aes(x = date, y = maxsnowdepth_cm, color = "Trans Burned Wx Station")) + 
+  geom_line(data = dailymax105E_transb_snow, aes(x = date, y = maxsnowdepth_cm, color = "Trans Burned Snowstake Camera")) +
+  geom_line(data = dailymax_transub_snow_wxstation, aes(x= date, y = maxsnowdepth_cm, color =  "Trans Unburned Wx Station"), alpha = 0.7) +
+  geom_line(data = dailymax105E_transub_snow, aes(x= date, y = maxsnowdepth_cm, color =  "Trans Unburned Snowstake Camera"), alpha = 0.7) +
+  labs(
+    #title = "Transitional Unburned",
+    x = "Date",
+    y = "Max Daily Snowdepth (cm)"
+    ) +
+  theme_bw() +
+  scale_color_manual(values = c("Trans Burned Wx Station" = "#D95F02", "Trans Burned Snowstake Camera" = "#E6AB02", "Trans Unburned Wx Station" = "#66A61E", "Trans Unburned Snowstake Camera"= "#7570B3"))
+
+dailytrans_sd_plot
+```
 
 ```{r}
 
+## example plot to use code of!
+burned_day_s_avg_plot <- ggplot(data = burned_day_s_avg_values) + 
+  geom_line(aes(x = date, y = SWin_Avg, color = "SWin_Avg", linetype = "Weather Station")) +
+  geom_line(aes(x = date, y = SWout_Avg, color = "SWout_Avg", linetype = "Weather Station")) +
+  geom_line(aes(x = date, y = LWin_Avg, color = "LWin_Avg", linetype = "Weather Station")) +
+  geom_line(aes(x = date, y = LWout_Avg, color = "LWout_Avg", linetype = "Weather Station")) +
+  geom_line(aes(x = date, y = tree_LWout_wperm2, color = "tree_LWout_avg_wperm2", linetype = "Tree Temperature Sensors")) +
+  facet_wrap(~ zone + burn_status, scales = "free_y", dir = "h") +  # Facet by zone and phase
+  labs(
+    #title = "Transitional Unburned",
+    x = "Date",
+    y = "Radiation components (W/m2)",
+    color = "Variable", 
+    linetype = "Data Source"
+    ) +
+  theme_bw() +  # Use a minimal theme for a clean look
+  scale_color_manual(values = color_values, labels = color_labels) + 
+  scale_linetype_manual(values = line_types)
+
+burned_day_s_avg_plot
+
+## unburned
+unburned_day_s_avg_plot <- ggplot(data = unburned_day_s_avg_values) + 
+  geom_line(aes(x = date, y = SWin_Avg, color = "SWin_Avg", linetype = "Weather Station")) +
+  geom_line(aes(x = date, y = SWout_Avg, color = "SWout_Avg", linetype = "Weather Station")) +
+  geom_line(aes(x = date, y = LWin_Avg, color = "LWin_Avg", linetype = "Weather Station")) +
+  geom_line(aes(x = date, y = LWout_Avg, color = "LWout_Avg", linetype = "Weather Station")) +
+  geom_line(aes(x = date, y = tree_LWout_wperm2, color = "tree_LWout_avg_wperm2", linetype = "Tree Temperature Sensors")) +
+  facet_wrap(~ zone + burn_status, scales = "free_y", dir = "h") +  # Facet by zone and phase
+  labs(
+    #title = "Transitional Unburned",
+    x = "Date",
+    y = "Radiation components (W/m2)",
+    color = "Variable", 
+    linetype = "Data Source"
+    ) +
+  theme_bw() +  # Use a minimal theme for a clean look
+  scale_color_manual(values = color_values, labels = color_labels) + 
+  scale_linetype_manual(values = line_types)
+
+unburned_day_s_avg_plot
 ```
